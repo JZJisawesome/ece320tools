@@ -159,7 +159,7 @@ fn main() -> std::process::ExitCode {
         let mode = Mode::get();
         println!("Running in \x1b[1;36m{}\x1b[0m mode", mode);
 
-        let (golden_path, test_path) = args()?;
+        let (golden_path, test_path) = args(&mode)?;
 
         let golden_trace    = load_trace(golden_path)?;
         let test_trace      = load_trace(test_path)?;
@@ -189,11 +189,12 @@ fn main() -> std::process::ExitCode {
     }
 }
 
-fn args() -> Result<(String, String)> {
+fn args(mode: &Mode) -> Result<(String, String)> {
     let mut args = std::env::args();
 
     if args.len() != 3 {
-        println!("\x1b[1;31mUsage: pd6diff path/to/golden_trace.trace path/to/your_trace.trace\x1b[0m");
+        println!("\x1b[1;31mUsage: pd6{}diff path/to/golden_PD5_trace.trace path/to/your_PD6_trace.trace\x1b[0m", mode);
+        println!("Note you must use a PD5 trace as a golden trace, not the PD6 golden traces (avoids the need for clock-cycle lookahead)");
         return Err(());
     }
 
@@ -227,8 +228,6 @@ fn compare_board(golden: ParsedLineIterator, test: ParsedLineIterator) -> u32 {
 
 //Returns the number of errors
 fn compare_sim(golden: ParsedLineIterator, test: ParsedLineIterator) -> u32 {
-    panic!("Sim mode not yet implemented, still making PD5 latency assumptions!");
-
     let mut total_error_count   = 0;
     let mut pipeline            = Pipeline::default();
 
@@ -247,6 +246,8 @@ fn compare_sim(golden: ParsedLineIterator, test: ParsedLineIterator) -> u32 {
         let (g_eline, t_eline)  = chunk[3];
         let (g_mline, t_mline)  = chunk[4];
         let (g_wline, t_wline)  = chunk[5];
+
+        let first_chunk = chunk_num == 1;
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         //Pipeline updating logic
@@ -339,6 +340,8 @@ fn compare_sim(golden: ParsedLineIterator, test: ParsedLineIterator) -> u32 {
             chunk_error_count += 1;
             println!("    \x1b[1;31mError {}: {}\x1b[0m", chunk_error_count, message);
         };
+
+        print_error("DEBUG");
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         //[F] Line Checking
