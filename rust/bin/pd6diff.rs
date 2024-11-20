@@ -822,6 +822,8 @@ fn compare_sim(golden: ParsedLineIterator, test: ParsedLineIterator) -> u32 {
             }
         }
 
+        print_error("(debug, not a real error)");
+
         total_error_count += chunk_error_count;
     }
 
