@@ -244,7 +244,7 @@ fn compare_board(golden: ParsedLineIterator, test: ParsedLineIterator) -> u32 {
     //golden has [F], [D], [R], [E], [M], [W]
     //test only has [W] when in board mode
     let golden: Vec<ParsedLine>                     = golden.collect();
-    let lines_vec: Vec<(&[ParsedLine], ParsedLine)> = golden.chunks(6).zip(test).collect();
+    let lines_vec: Vec<(&[ParsedLine], ParsedLine)> = golden.chunks(6).skip(1).zip(test).collect();
     let line_chunks_windowed                        = lines_vec.windows(2);
 
     let mut squash_fetch_and_decode_next_cycle = false;
